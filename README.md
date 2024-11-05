@@ -1,7 +1,11 @@
 # uts-bagus-setya-putra
 repository untuk uts web service
+Nama: Bagus Setya Putra
+NIM: 21 01 65 0002
+Saya membuat integrasi web service dengan studi kasus manajemen video game PS dengan menngunakan postman
+berikut source code diantaranya:
 
-File PHP
+1. File PHP
 source code php dibuat dengan nama ps_api.php
 <?php
 header("Content-Type: application/json; charset=UTF-8");
@@ -117,15 +121,16 @@ switch ($method) {
 }
 ?>
 
-Script SQL
-CREATE TABLE ps (
+2. Script SQL
+
+A. CREATE TABLE ps (
     id INT AUTO_INCREMENT PRIMARY KEY,
     unit_number VARCHAR(10) NOT NULL,
     type VARCHAR(20) NOT NULL,
     status_barang VARCHAR(30) NOT NULL,
     hourly_rate VARCHAR(10) NOT NULL);
 
-INSERT INTO ps (id, unit_number, type, status_barang, hourly_rate) VALUES
+B. INSERT INTO ps (id, unit_number, type, status_barang, hourly_rate) VALUES
 ('01', '11', 'ps 3', 'lengkap', '1 jam' ),
 ('02', '12', 'ps 4', 'lengkap', '2 jam'),
 ('03', '13', 'ps 3', 'lengkap', '1 jam'),
