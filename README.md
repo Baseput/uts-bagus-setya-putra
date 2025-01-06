@@ -85,15 +85,12 @@ if ($resource === 'api' && isset($pathFragments[1]) && $pathFragments[1] === 'bo
 
         case 'PUT':
             if (isset($pathFragments[4])) {
-                // Memperbarui buku berdasarkan ID
                 $input = getInput();
-                // Cek apakah buku ada
                 $stmt = $db->prepare("SELECT * FROM books WHERE id = :id");
                 $stmt->bindParam(':id', $id, PDO::PARAM_INT);
                 $stmt->execute();
                 $book = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($book) {
-                    // Update data
                     $title = isset($input['unit_number']) ? $input['unit_number'] : $book['unit_number'];
                     $author = isset($input['type']) ? $input['type'] : $book['type'];
                     $stmt = $db->prepare("UPDATE books SET unit_number = :unit_number, type = :type WHERE id = :id");
