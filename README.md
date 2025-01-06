@@ -5,135 +5,142 @@ repository untuk uts web service
 3. Deskripsi: Saya membuat integrasi web service dengan studi kasus manajemen video game PS dengan menngunakan postman
 berikut source code diantaranya:
 
-1. File PHP
-## source code php dibuat dengan nama ps_api.php
+**File index.PHP**
+```
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+require_once 'db.php';
+
+$database = new Database();
+$db = $database->getConnection();
+
 $method = $_SERVER['REQUEST_METHOD'];
-$request = [];
 
-if (isset($_SERVER['PATH_INFO'])) {
-    $request = explode('/', trim($_SERVER['PATH_INFO'],'/'));
-}
+$request = $_SERVER['REQUEST_URI'];
+$script_name = dirname($_SERVER['SCRIPT_NAME']);
+$path = substr(parse_url($request, PHP_URL_PATH), strlen($script_name));
+$pathFragments = explode('/', trim($path, '/'));
+$resource = isset($pathFragments[0]) ? $pathFragments[0] : null;
+$id = isset($pathFragments[1]) ? (int)$pathFragments[1] : null;
 
-function getConnection() {
-    $host = 'localhost';
-    $db   = 'playstation_units';
-    $user = 'root';
-    $pass = ''; // Ganti dengan password MySQL Anda jika ada
-    $charset = 'utf8mb4';
-
-    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
-    try {
-        return new PDO($dsn, $user, $pass, $options);
-    } catch (\PDOException $e) {
-        throw new \PDOException($e->getMessage(), (int)$e->getCode());
-    }
-}
-
-function response($status, $data = NULL) {
-    header("HTTP/1.1 " . $status);
-    if ($data) {
-        echo json_encode($data);
-    }
+function sendResponse($data, $status_code = 200) {
+    http_response_code($status_code);
+    echo json_encode($data);
     exit();
 }
 
-$db = getConnection();
+function getInput() {
+    return json_decode(file_get_contents('php://input'), true);
+}
 
-switch ($method) {
-    case 'GET':
-        if (!empty($request) && isset($request[0])) {
-            $id = $request[0];
-            $stmt = $db->prepare("SELECT * FROM ps WHERE id = ?");
-            $stmt->execute([$id]);
-            $ps = $stmt->fetch();
-            if ($ps) {
-                response(200, $ps);
+if ($resource === 'api' && isset($pathFragments[1]) && $pathFragments[1] === 'books') {
+    switch ($method) {
+        case 'GET':
+            if (isset($pathFragments[4])) {
+                $stmt = $db->prepare("SELECT * FROM books WHERE id = :id");
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmt->execute();
+                $book = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($book) {
+                    sendResponse($book);
+                } else {
+                    sendResponse(['message' => 'Data tidak ditemukan'], 404);
+                }
             } else {
-                response(404, ["message" => "data not found"]);
+                $stmt = $db->prepare("SELECT * FROM books");
+                $stmt->execute();
+                $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                sendResponse($books);
             }
-        } else {
-            $stmt = $db->query("SELECT * FROM ps");
-            $books = $stmt->fetchAll();
-            response(200, $ps);
-        }
-        break;
-    
-    case 'POST':
-        $data = json_decode(file_get_contents("php://input"));
-        if (!isset($data->title) || !isset($data->author) || !isset($data->year)) {
-            response(400, ["message" => "Missing required fields"]);
-        }
-        $sql = "INSERT INTO ps (unit_number, type, status_barang, hourly_rate) VALUES (?, ?, ?, ?)";
-        $stmt = $db->prepare($sql);
-        if ($stmt->execute([$data->unit_number, $data->type, $data->status_barang, $data->hourly_rate,])) {
-            response(201, ["message" => "data dibuat", "id" => $db->lastInsertId()]);
-        } else {
-            response(500, ["message" => "gagal menambahkan"]);
-        }
-        break;
-    
-    case 'PUT':
-        if (empty($request) || !isset($request[0])) {
-            response(400, ["message" => "data ID is required"]);
-        }
-        $id = $request[0];
-        $data = json_decode(file_get_contents("php://input"));
-        if (!isset($data->unit_number) || !isset($data->type)  || !isset($data->status_barang) || !isset($data-> hourly_rate)) {
-            response(400, ["message" => "Missing required fields"]);
-        }
-        $sql = "UPDATE ps SET unit_number = ?, type = ?, status_barang = ?, hourly_rate = ? WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        if ($stmt->execute([$data->unit_number, $data->type, $data->status_barang, $data->hourly_rate, $id])) {
-            response(200, ["message" => "data telah di tambahkan"]);
-        } else {
-            response(500, ["message" => "gagal menambahkan"]);
-        }
-        break;
-    
-    case 'DELETE':
-        if (empty($request) || !isset($request[0])) {
-            response(400, ["message" => "data ID is required"]);
-        }
-        $id = $request[0];
-        $sql = "DELETE FROM ps WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        if ($stmt->execute([$id])) {
-            response(200, ["message" => "data dihapus"]);
-        } else {
-            response(500, ["message" => "gagal menghapus data"]);
-        }
-        break;
-    
-    default:
-        response(405, ["message" => "Method not allowed"]);
-        break;
+            break;
+
+        case 'POST':
+            $input = getInput();
+            if (isset($input['unit_number']) && isset($input['type'])) {
+                $stmt = $db->prepare("INSERT INTO books (unit_number, type) VALUES (:unit_number, :type)");
+                $stmt->bindParam(':unit_number', $input['unit_number']);
+                $stmt->bindParam(':type', $input['type']);
+                if ($stmt->execute()) {
+                    $new_id = $db->lastInsertId();
+                    $new_book = [
+                        'id' => (int)$new_id,
+                        'unit_number' => $input['unit_number'],
+                        'type' => $input['type']
+                    ];
+                    sendResponse($new_book, 201);
+                } else {
+                    sendResponse(['message' => 'Gagal menambahkan data'], 500);
+                }
+            } else {
+                sendResponse(['message' => 'Data tidak lengkap'], 400);
+            }
+            break;
+
+        case 'PUT':
+            if (isset($pathFragments[4])) {
+                // Memperbarui buku berdasarkan ID
+                $input = getInput();
+                // Cek apakah buku ada
+                $stmt = $db->prepare("SELECT * FROM books WHERE id = :id");
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmt->execute();
+                $book = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($book) {
+                    // Update data
+                    $title = isset($input['unit_number']) ? $input['unit_number'] : $book['unit_number'];
+                    $author = isset($input['type']) ? $input['type'] : $book['type'];
+                    $stmt = $db->prepare("UPDATE books SET unit_number = :unit_number, type = :type WHERE id = :id");
+                    $stmt->bindParam(':unit_number', $unit_number);
+                    $stmt->bindParam(':type', $type);
+                    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                    if ($stmt->execute()) {
+                        $updated_book = [
+                            'id' => (int)$id,
+                            'title' => $unit_number,
+                            'author' => $type
+                        ];
+                        sendResponse($updated_book);
+                    } else {
+                        sendResponse(['message' => 'Gagal memperbarui data'], 500);
+                    }
+                } else {
+                    sendResponse(['message' => 'Data tidak ditemukan'], 404);
+                }
+            } else {
+                sendResponse(['message' => 'ID tidak disediakan'], 400);
+            }
+            break;
+
+        case 'DELETE':
+            if (isset($pathFragments[4])) {
+                $stmt = $db->prepare("DELETE FROM books WHERE id = :id");
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                if ($stmt->execute()) {
+                    if ($stmt->rowCount() > 0) {
+                        sendResponse(['message' => 'Data dihapus']);
+                    } else {
+                        sendResponse(['message' => 'Data tidak ditemukan'], 404);
+                    }
+                } else {
+                    sendResponse(['message' => 'Gagal menghapus Data'], 500);
+                }
+            } else {
+                sendResponse(['message' => 'ID tidak disediakan'], 400);
+            }
+            break;
+
+        default:
+            sendResponse(['message' => 'Metode tidak diizinkan'], 405);
+    }
+} else {
+    sendResponse(['message' => 'Endpoint tidak ditemukan'], 404);
 }
 ?>
-
-2. Script SQL
-
-A. CREATE TABLE ps (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    unit_number VARCHAR(10) NOT NULL,
-    type VARCHAR(20) NOT NULL,
-    status_barang VARCHAR(30) NOT NULL,
-    hourly_rate VARCHAR(10) NOT NULL);
-
-B. INSERT INTO ps (id, unit_number, type, status_barang, hourly_rate) VALUES
-('01', '11', 'ps 3', 'lengkap', '1 jam' ),
-('02', '12', 'ps 4', 'lengkap', '2 jam'),
-('03', '13', 'ps 3', 'lengkap', '1 jam'),
-('04', '14', 'ps 3', '1 stick', '3 jam'),
-('05', '15', 'ps 4', '1 memory', '1 jam');
-
+```
