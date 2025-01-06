@@ -171,3 +171,19 @@ class Database {
 }
 ?>
 ```
+**Create database dan table menggunakan XAMPP Php Myadmin**
+```
+CREATE TABLE books (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    unit_number VARCHAR(10) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    hourly_rate VARCHAR(20) NOT NULL
+);
+INSERT INTO books (unit_number, type, status, hourly_rate) VALUES
+('unit 1', 'ps2', 'sewa', '2jam'),
+('unit 2', 'ps3', 'sewa', '1jam'),
+('unit 3', 'ps3', 'tersedia', 'free'),
+('unit 4', 'ps4', 'tersedia', 'free'),
+('unit 5', 'ps3', 'tersedia', 'free');
+```
