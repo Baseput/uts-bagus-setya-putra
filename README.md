@@ -1,8 +1,8 @@
 # uts-bagus-setya-putra
 repository untuk uts web service
-Nama: Bagus Setya Putra
-NIM: 21 01 65 0002
-Saya membuat integrasi web service dengan studi kasus manajemen video game PS dengan menngunakan postman
+1. Nama: Bagus Setya Putra
+2. NIM: 21 01 65 0002
+3. Deskripsi: Saya membuat integrasi web service dengan studi kasus manajemen video game PS dengan menngunakan postman
 berikut source code diantaranya:
 
 1. File PHP
