@@ -5,6 +5,23 @@ repository untuk uts web service
 3. Deskripsi: Saya membuat integrasi web service dengan studi kasus manajemen video game PS dengan menngunakan postman
 berikut source code diantaranya:
 
+**Create database dan table menggunakan XAMPP Php Myadmin**
+```
+CREATE TABLE playstation_units (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    unit_number VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    hourly_rate DECIMAL(10, 2) NOT NULL
+);
+
+INSERT INTO playstation_units (unit_number, type, status, hourly_rate) VALUES
+('PS001', 'PS4', 'Available', 5000.00),
+('PS002', 'PS4', 'In Use', 5000.00),
+('PS003', 'PS4', 'Maintenance', 5000.00),
+('PS004', 'PS5', 'Available', 7000.00),
+('PS005', 'PS5', 'In Use', 7000.00);
+```
 **File index.PHP**
 ```
 <?php
@@ -173,17 +190,18 @@ class Database {
 ```
 **Create database dan table menggunakan XAMPP Php Myadmin**
 ```
-CREATE TABLE books (
+CREATE TABLE playstation_units (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    unit_number VARCHAR(10) NOT NULL,
-    type VARCHAR(20) NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    hourly_rate VARCHAR(20) NOT NULL
+    unit_number VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    hourly_rate DECIMAL(10, 2) NOT NULL
 );
-INSERT INTO books (unit_number, type, status, hourly_rate) VALUES
-('unit 1', 'ps2', 'sewa', '2jam'),
-('unit 2', 'ps3', 'sewa', '1jam'),
-('unit 3', 'ps3', 'tersedia', 'free'),
-('unit 4', 'ps4', 'tersedia', 'free'),
-('unit 5', 'ps3', 'tersedia', 'free');
+
+INSERT INTO playstation_units (unit_number, type, status, hourly_rate) VALUES
+('PS001', 'PS4', 'Available', 5000.00),
+('PS002', 'PS4', 'In Use', 5000.00),
+('PS003', 'PS4', 'Maintenance', 5000.00),
+('PS004', 'PS5', 'Available', 7000.00),
+('PS005', 'PS5', 'In Use', 7000.00);
 ```
