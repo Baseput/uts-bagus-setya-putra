@@ -5,7 +5,7 @@ repository untuk uts web service
 3. Deskripsi: Saya membuat integrasi web service dengan studi kasus manajemen video game PS dengan menngunakan postman
 berikut source code diantaranya:
 
-**Create database dan table menggunakan XAMPP Php Myadmin**
+**Create database dan table menggunakan XAMPP My SQL**
 ```
 CREATE TABLE playstation_units (
     id INT AUTO_INCREMENT PRIMARY KEY,
